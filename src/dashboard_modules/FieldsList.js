@@ -1,6 +1,7 @@
 import React from 'react'
 import { DOMAIN } from './ApiSettings'
 import FieldsForm from './FieldsForm'
+import FieldsNotifications from './FieldsNotifications'
 
 export default class FieldsList extends React.Component {
 
@@ -13,12 +14,13 @@ export default class FieldsList extends React.Component {
             editComponent: null,
             editForm: false,
             editData: {},
-            showList: true
+            showList: true,
+            showNotifications: false
         };
     }
 
     add = () => {
-        this.setState({showForm: true, editForm: false, showList: false});
+        this.setState({showForm: true, editForm: false, showList: false, showNotifications: false});
     }
 
     addCallback = (op) => {
@@ -31,11 +33,11 @@ export default class FieldsList extends React.Component {
 
     edit = (e) => {
         this.getOne(e.target.id.replace("edit-", ""));
-        this.setState({showForm: false, editForm: true, showList: false})
+        this.setState({showForm: false, editForm: true, showList: false, showNotifications: false})
     }
 
     editCallback = (op) => {
-        this.setState({editForm: false,editData: {}, showList: true});
+        this.setState({editForm: false,editData: {}, showList: true, showNotifications: false});
         this.get();
         
         if(op == "ok") {
@@ -81,7 +83,7 @@ export default class FieldsList extends React.Component {
                 return response.json()
             })
             .then(data => {
-                self.setState({ editData: data, editForm: true, showList: false }); 
+                self.setState({ editData: data, editForm: true, showList: false, showNotifications: false }); 
                 self.editComponent.build();     
             }
         );
@@ -99,8 +101,26 @@ export default class FieldsList extends React.Component {
         );
     }
 
+    notifications = () => {
+        this.setState({
+            showForm: false,
+            showList: false,
+            editForm: false,
+            showNotifications: true
+        })
+    }
+
+    list = () => {
+        this.setState({
+            showForm: false,
+            showList: true,
+            editForm: false,
+            showNotifications: false
+        })
+    }
+
     close = () => {
-        this.setState({showForm: false, showList: true});
+        this.setState({showForm: false, showList: true, showNotifications: false});
     }
 
     componentDidMount() {
@@ -112,6 +132,12 @@ export default class FieldsList extends React.Component {
       return <div id="fields-list">          
             <h2 className="pt-3 pb-3 float-left">{this.state.title}</h2>
             <button type="submit" className="btn btn-primary mt-3 mb-3 float-right" id="addField" onClick={self.add}>Add</button>
+            {
+                this.state.showNotifications ?                
+                <button type="button" className="btn btn-primary mt-3 mb-3 mr-2 float-right" id="addField" onClick={self.list}>Show fields list</button>
+                :
+                <button type="button" className="btn btn-primary mt-3 mb-3 mr-2 float-right" id="addField" onClick={self.notifications}>Show fields history</button>
+            }
 
             {
                 this.state.showForm ? <FieldsForm closeHandler = {this.close} returnHandler = {this.addCallback} /> : <div></div>
@@ -149,13 +175,25 @@ export default class FieldsList extends React.Component {
                                     <td>{key.maskRegex}</td>
                                     <td>{key.placeholder}</td>
                                     <td>
-                                        <button type="submit" className="btn btn-primary" id={"delete-"+key.idField} onClick={self.delete}>Delete</button>
+                                        <button type="submit" className="btn btn-primary mr-2" id={"delete-"+key.idField} onClick={self.delete}>Delete</button>
                                         <button type="submit" className="btn btn-primary" id={"edit-"+key.idField} onClick={self.edit}>Edit</button>
                                     </td>
                                 </tr>;
                         })}
                     </tbody>
                 </table>
+
+                :
+
+                <div></div>
+
+            }
+
+            {
+
+                this.state.showNotifications ?
+
+                <FieldsNotifications />
 
                 :
 
